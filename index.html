@@ -25,7 +25,32 @@
         h1 {
             text-align: center;
             color: #222;
+            margin-bottom: 20px;
+        }
+
+        /* Форма добавления карточек */
+        .add-form-container {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             margin-bottom: 30px;
+        }
+
+        .add-form-container h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .add-form-container input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
         }
 
         .items-grid {
@@ -106,6 +131,14 @@
             width: 100%;
         }
 
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .reserve-btn {
+            background: var(--secondary);
+        }
+
         .reserve-btn:hover {
             background: #3182ce;
         }
@@ -116,6 +149,14 @@
 
         .unreserve-btn:hover {
             background: #718096;
+        }
+
+        .add-btn {
+            background: #48bb78;
+        }
+
+        .add-btn:hover {
+            background: #38a169;
         }
 
         .empty-list {
@@ -130,20 +171,24 @@
 
     <h1>🎁 Мой Вишлист</h1>
 
+    <!-- Блок добавления карточек -->
+    <div class="add-form-container">
+        <h3>➕ Добавить новый подарок</h3>
+        <form id="addItemForm">
+            <input type="text" id="itemTitle" placeholder="Название подарка" required>
+            <input type="url" id="itemUrl" placeholder="Ссылка на товар (например: https://ozon.ru/...)" required>
+            <input type="url" id="itemImage" placeholder="Ссылка на картинку (например: https://...)" required>
+            <button type="submit" class="add-btn">Добавить в вишлист</button>
+        </form>
+    </div>
+
+    <!-- Сетка карточек -->
     <div id="itemsList" class="items-grid"></div>
 
     <script>
-        // СПИСОК ПОДАРКОВ ЗАДАЕТСЯ ЗДЕСЬ (в коде)
-        // Чтобы изменить список, отредактируйте этот массив:
+        // Начальный список подарков (если память пуста)
         const defaultItems = [
-            {
-                id: 1,
-                title: 'ремувка с принтом майнкрафт',
-                url: 'https://www.wildberries.ru/catalog/456707033/detail.aspx?targetUrl=SN',
-                image: 'https://basket-26.wbbasket.ru/vol4567/part456707/456707033/images/big/1.webp',
-                isReserved: false,
-                reservedBy: ''
-            },
+           
             {
                 id: 2,
                 title: 'Беспроводные наушники',
@@ -151,25 +196,44 @@
                 image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
                 isReserved: false,
                 reservedBy: ''
-            },
-            {
-                id: 3,
-                title: 'Настольная игра "Каркассон"',
-                url: 'https://www.ozon.ru',
-                image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09',
-                isReserved: false,
-                reservedBy: ''
             }
         ];
 
-        // Загрузка данных (если они уже были забронированы ранее на этом устройстве)
-        let items = JSON.parse(localStorage.getItem('wishlist_items_v2')) || defaultItems;
+        // Загрузка данных из localStorage
+        let items = JSON.parse(localStorage.getItem('wishlist_items_v3')) || defaultItems;
 
         function saveAndRender() {
-            localStorage.setItem('wishlist_items_v2', JSON.stringify(items));
+            localStorage.setItem('wishlist_items_v3', JSON.stringify(items));
             renderItems();
         }
 
+        // Обработка отправки формы добавления подарка
+        document.getElementById('addItemForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const title = document.getElementById('itemTitle').value.trim();
+            const url = document.getElementById('itemUrl').value.trim();
+            const image = document.getElementById('itemImage').value.trim();
+
+            if (!title || !url || !image) return;
+
+            const newItem = {
+                id: Date.now(), // Уникальный ID на основе текущего времени
+                title: title,
+                url: url,
+                image: image,
+                isReserved: false,
+                reservedBy: ''
+            };
+
+            items.push(newItem);
+            saveAndRender();
+
+            // Очищаем форму
+            this.reset();
+        });
+
+        // Функция бронирования / снятия брони
         function toggleReserve(id) {
             const item = items.find(i => i.id === id);
             if (!item) return;
@@ -192,6 +256,7 @@
             saveAndRender();
         }
 
+        // Отрисовка карточек на странице
         function renderItems() {
             const listContainer = document.getElementById('itemsList');
             listContainer.innerHTML = '';
@@ -225,6 +290,7 @@
             });
         }
 
+        // Первичный вывод карточек при загрузке страницы
         renderItems();
     </script>
 </body>
