@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вишлист</title>
+    <style>
+        :root {
+            --primary: #ff4757;
+            --secondary: #1e90ff;
+            --bg-color: #f4f4f9;
+            --card-bg: #ffffff;
+            --text-color: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        h1 {
+            text-align: center;
+            color: #222;
+            margin-bottom: 30px;
+        }
+
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .item-card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s;
+        }
+
+        .item-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .item-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #eee;
+        }
+
+        .item-card h3 {
+            font-size: 16px;
+            margin: 10px 0 5px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .item-card a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-size: 13px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .item-card a:hover {
+            text-decoration: underline;
+        }
+
+        .reserved {
+            background: #edf2f7;
+            border: 1px solid #cbd5e0;
+        }
+
+        .reserved-badge {
+            background: #48bb78;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            text-align: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        button {
+            background: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .reserve-btn:hover {
+            background: #3182ce;
+        }
+
+        .unreserve-btn {
+            background: #a0aec0;
+        }
+
+        .unreserve-btn:hover {
+            background: #718096;
+        }
+
+        .empty-list {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: #718096;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🎁 Мой Вишлист</h1>
+
+    <div id="itemsList" class="items-grid"></div>
+
+    <script>
+        // СПИСОК ПОДАРКОВ ЗАДАЕТСЯ ЗДЕСЬ (в коде)
+        // Чтобы изменить список, отредактируйте этот массив:
+        const defaultItems = [
+            {
+                id: 1,
+                title: 'Кроссовки Nike Air Force',
+                url: 'https://www.wildberries.ru',
+                image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff',
+                isReserved: false,
+                reservedBy: ''
+            },
+            {
+                id: 2,
+                title: 'Беспроводные наушники',
+                url: 'https://www.ozon.ru',
+                image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
+                isReserved: false,
+                reservedBy: ''
+            },
+            {
+                id: 3,
+                title: 'Настольная игра "Каркассон"',
+                url: 'https://www.ozon.ru',
+                image: 'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09',
+                isReserved: false,
+                reservedBy: ''
+            }
+        ];
+
+        // Загрузка данных (если они уже были забронированы ранее на этом устройстве)
+        let items = JSON.parse(localStorage.getItem('wishlist_items_v2')) || defaultItems;
+
+        function saveAndRender() {
+            localStorage.setItem('wishlist_items_v2', JSON.stringify(items));
+            renderItems();
+        }
+
+        function toggleReserve(id) {
+            const item = items.find(i => i.id === id);
+            if (!item) return;
+
+            if (!item.isReserved) {
+                const userName = prompt('Введите ваше имя, чтобы забронировать подарок:');
+                if (!userName || userName.trim() === '') return;
+
+                item.isReserved = true;
+                item.reservedBy = userName.trim();
+            } else {
+                const confirmUnreserve = confirm('Вы уверены, что хотите снять бронь с этого подарка?');
+                if (confirmUnreserve) {
+                    item.isReserved = false;
+                    item.reservedBy = '';
+                } else {
+                    return;
+                }
+            }
+            saveAndRender();
+        }
+
+        function renderItems() {
+            const listContainer = document.getElementById('itemsList');
+            listContainer.innerHTML = '';
+
+            if (items.length === 0) {
+                listContainer.innerHTML = '<div class="empty-list">Список подарков пуст.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `item-card ${item.isReserved ? 'reserved' : ''}`;
+
+                card.innerHTML = `
+                    <div>
+                        <img src="${item.image}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/260x180?text=Нет+фото'">
+                        <h3>${item.title}</h3>
+                        <a href="${item.url}" target="_blank">🔗 Посмотреть на сайте</a>
+                    </div>
+                    <div>
+                        ${item.isReserved 
+                            ? `
+                              <div class="reserved-badge">🔒 Забронировал(а): ${item.reservedBy}</div>
+                              <button class="unreserve-btn" onclick="toggleReserve(${item.id})">Снять бронь</button>
+                              ` 
+                            : `<button class="reserve-btn" onclick="toggleReserve(${item.id})">Забронировать</button>`
+                        }
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        renderItems();
+    </script>
+</body>
+</html>
