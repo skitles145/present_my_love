@@ -27,13 +27,18 @@
     <h1>Вишлист с бронированием 🎁</h1>
 
     <!-- Форма добавления товара -->
-    
+    <div class="form-card">
+        <h2>Добавить товар</h2>
+        <input type="text" id="title" placeholder="Название товара">
+        <input type="text" id="url" placeholder="Ссылка на маркетплейс (Wildberries, Ozon...)">
+        <input type="text" id="image" placeholder="Ссылка на фото товара (URL)">
+        <button onclick="addItem()">Добавить в список</button>
+    </div>
 
     <h2>Список товаров</h2>
     <div id="itemsList" class="items-grid"></div>
 
     <script>
-        // Исправлено: добавлен оператор || для проверки пустого localStorage
         let items = JSON.parse(localStorage.getItem('wishlist_items')) || [];
 
         function saveAndRender() {
@@ -46,7 +51,6 @@
             const url = document.getElementById('url').value;
             const image = document.getElementById('image').value;
 
-            // Исправлено: добавлены операторы || вместо пробелов
             if (!title || !url || !image) {
                 alert('Пожалуйста, заполните все поля!');
                 return;
@@ -87,26 +91,24 @@
 
             items.forEach(item => {
                 const card = document.createElement('div');
-                // Исправлено: добавлены обратные кавычки для шаблонной строки
                 card.className = `item-card ${item.isReserved ? 'reserved' : ''}`;
 
                 card.innerHTML = `
-                    <img src="${item.image}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/240x200?text=Нет+фото'">
+                    <img src="${item.image}" alt="${item.title}">
                     <h3>${item.title}</h3>
-                    <a href="${item.url}" target="_blank">Ссылка на товар</a>
+                    <a href="${item.url}" target="_blank">Посмотреть товар ↗</a>
                     <div>
-                        ${item.isReserved ? '<div class="reserved-badge">Забронировано</div>' : ''}
+                        ${item.isReserved ? '<span class="reserved-badge">Забронировано 🔒</span>' : ''}
                     </div>
                     <button class="reserve-btn" onclick="toggleReserve(${item.id})">
                         ${item.isReserved ? 'Снять бронь' : 'Забронировать'}
                     </button>
                 `;
-
                 listContainer.appendChild(card);
             });
         }
 
-        // Первичная отрисовка при загрузке страницы
+        // Первичный запуск отрисовки при загрузке страницы
         renderItems();
     </script>
 </body>
