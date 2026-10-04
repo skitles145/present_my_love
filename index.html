@@ -3,294 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Вишлист</title>
+    <title>Список подарков с бронированием</title>
     <style>
-        :root {
-            --primary: #ff4757;
-            --secondary: #1e90ff;
-            --bg-color: #f4f4f9;
-            --card-bg: #ffffff;
-            --text-color: #333;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            background: var(--bg-color);
-            color: var(--text-color);
-        }
-
-        h1 {
-            text-align: center;
-            color: #222;
-            margin-bottom: 20px;
-        }
-
-        /* Форма добавления карточек */
-        .add-form-container {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 30px;
-        }
-
-        .add-form-container h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            font-size: 18px;
-        }
-
-        .add-form-container input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        .items-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
-        }
-
-        .item-card {
-            background: var(--card-bg);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            transition: transform 0.2s;
-        }
-
-        .item-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .item-card img {
-            width: 100%;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 6px;
-            background: #eee;
-        }
-
-        .item-card h3 {
-            font-size: 16px;
-            margin: 10px 0 5px 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .item-card a {
-            color: var(--secondary);
-            text-decoration: none;
-            font-size: 13px;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-
-        .item-card a:hover {
-            text-decoration: underline;
-        }
-
-        .reserved {
-            background: #edf2f7;
-            border: 1px solid #cbd5e0;
-        }
-
-        .reserved-badge {
-            background: #48bb78;
-            color: white;
-            padding: 6px 10px;
-            border-radius: 6px;
-            font-size: 13px;
-            text-align: center;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        button {
-            background: var(--secondary);
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-weight: bold;
-            font-size: 14px;
-            transition: background 0.2s;
-            width: 100%;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .reserve-btn {
-            background: var(--secondary);
-        }
-
-        .reserve-btn:hover {
-            background: #3182ce;
-        }
-
-        .unreserve-btn {
-            background: #a0aec0;
-        }
-
-        .unreserve-btn:hover {
-            background: #718096;
-        }
-
-        .add-btn {
-            background: #48bb78;
-        }
-
-        .add-btn:hover {
-            background: #38a169;
-        }
-
-        .empty-list {
-            grid-column: 1 / -1;
-            text-align: center;
-            color: #718096;
-            padding: 40px;
-        }
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f4f4f9; }
+        h1, h2 { text-align: center; color: #333; }
+        .form-card, .item-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .form-card input { width: 100%; padding: 8px; margin: 5px 0 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #ff4757; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
+        button:hover { background: #ff6b81; }
+        .items-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 15px; }
+        .item-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 4px; }
+        .item-card h3 { font-size: 16px; margin: 10px 0 5px 0; }
+        .item-card a { display: inline-block; color: #1e90ff; font-size: 13px; text-decoration: none; margin-bottom: 10px; }
+        .item-card a:hover { text-decoration: underline; }
+        .reserved { background: #e2e8f0; opacity: 0.8; }
+        .reserved-badge { background: #2ed573; color: white; padding: 5px 10px; border-radius: 4px; display: inline-block; font-size: 14px; margin-top: 5px; margin-bottom: 5px; }
+        .reserve-btn { background: #1e90ff; width: 100%; margin-top: 10px; }
+        .reserve-btn:hover { background: #3742fa; }
     </style>
 </head>
 <body>
 
-    <h1>🎁 Мой Вишлист</h1>
+    <h1>Вишлист с бронированием</h1>
 
-    <!-- Блок добавления карточек -->
-    <div class="add-form-container">
-        <h3>➕ Добавить новый подарок</h3>
-        <form id="addItemForm">
-            <input type="text" id="itemTitle" placeholder="Название подарка" required>
-            <input type="url" id="itemUrl" placeholder="Ссылка на товар (например: https://ozon.ru/...)" required>
-            <input type="url" id="itemImage" placeholder="Ссылка на картинку (например: https://...)" required>
-            <button type="submit" class="add-btn">Добавить в вишлист</button>
-        </form>
+    <!-- Форма добавления товара -->
+    <div class="form-card">
+        <h2>Добавить товар</h2>
+        <input type="text" id="title" placeholder="Название товара">
+        <input type="text" id="url" placeholder="Ссылка на маркетплейс (Wildberries, Ozon...)">
+        <input type="text" id="image" placeholder="Ссылка на фото товара (URL)">
+        <button onclick="addItem()">Добавить в список</button>
     </div>
 
-    <!-- Сетка карточек -->
+    <h2>Список товаров</h2>
     <div id="itemsList" class="items-grid"></div>
 
     <script>
-        // Начальный список подарков (если память пуста)
-        const defaultItems = [
-           
-            {
-                id: 2,
-                title: 'Беспроводные наушники',
-                url: 'https://www.ozon.ru',
-                image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e',
-                isReserved: false,
-                reservedBy: ''
-            }
-        ];
-
-        // Загрузка данных из localStorage
-        let items = JSON.parse(localStorage.getItem('wishlist_items_v3')) || defaultItems;
+        // Исправлено: добавлен оператор || для проверки пустого localStorage
+        let items = JSON.parse(localStorage.getItem('wishlist_items')) || [];
 
         function saveAndRender() {
-            localStorage.setItem('wishlist_items_v3', JSON.stringify(items));
+            localStorage.setItem('wishlist_items', JSON.stringify(items));
             renderItems();
         }
 
-        // Обработка отправки формы добавления подарка
-        document.getElementById('addItemForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        function addItem() {
+            const title = document.getElementById('title').value;
+            const url = document.getElementById('url').value;
+            const image = document.getElementById('image').value;
 
-            const title = document.getElementById('itemTitle').value.trim();
-            const url = document.getElementById('itemUrl').value.trim();
-            const image = document.getElementById('itemImage').value.trim();
-
-            if (!title || !url || !image) return;
+            // Исправлено: добавлены операторы || вместо пробелов
+            if (!title || !url || !image) {
+                alert('Пожалуйста, заполните все поля!');
+                return;
+            }
 
             const newItem = {
-                id: Date.now(), // Уникальный ID на основе текущего времени
-                title: title,
-                url: url,
-                image: image,
-                isReserved: false,
-                reservedBy: ''
+                id: Date.now(),
+                title,
+                url,
+                image,
+                isReserved: false
             };
 
             items.push(newItem);
-            saveAndRender();
+            document.getElementById('title').value = '';
+            document.getElementById('url').value = '';
+            document.getElementById('image').value = '';
 
-            // Очищаем форму
-            this.reset();
-        });
-
-        // Функция бронирования / снятия брони
-        function toggleReserve(id) {
-            const item = items.find(i => i.id === id);
-            if (!item) return;
-
-            if (!item.isReserved) {
-                const userName = prompt('Введите ваше имя, чтобы забронировать подарок:');
-                if (!userName || userName.trim() === '') return;
-
-                item.isReserved = true;
-                item.reservedBy = userName.trim();
-            } else {
-                const confirmUnreserve = confirm('Вы уверены, что хотите снять бронь с этого подарка?');
-                if (confirmUnreserve) {
-                    item.isReserved = false;
-                    item.reservedBy = '';
-                } else {
-                    return;
-                }
-            }
             saveAndRender();
         }
 
-        // Отрисовка карточек на странице
+        function toggleReserve(id) {
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.isReserved = !item.isReserved;
+                saveAndRender();
+            }
+        }
+
         function renderItems() {
             const listContainer = document.getElementById('itemsList');
             listContainer.innerHTML = '';
 
             if (items.length === 0) {
-                listContainer.innerHTML = '<div class="empty-list">Список подарков пуст.</div>';
+                listContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #777;">Список пока пуст</p>';
                 return;
             }
 
             items.forEach(item => {
                 const card = document.createElement('div');
+                // Исправлено: добавлены обратные кавычки для шаблонной строки
                 card.className = `item-card ${item.isReserved ? 'reserved' : ''}`;
 
                 card.innerHTML = `
+                    <img src="${item.image}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/240x200?text=Нет+фото'">
+                    <h3>${item.title}</h3>
+                    <a href="${item.url}" target="_blank">Ссылка на товар</a>
                     <div>
-                        <img src="${item.image}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/260x180?text=Нет+фото'">
-                        <h3>${item.title}</h3>
-                        <a href="${item.url}" target="_blank">🔗 Посмотреть на сайте</a>
+                        ${item.isReserved ? '<div class="reserved-badge">Забронировано</div>' : ''}
                     </div>
-                    <div>
-                        ${item.isReserved 
-                            ? `
-                              <div class="reserved-badge">🔒 Забронировал(а): ${item.reservedBy}</div>
-                              <button class="unreserve-btn" onclick="toggleReserve(${item.id})">Снять бронь</button>
-                              ` 
-                            : `<button class="reserve-btn" onclick="toggleReserve(${item.id})">Забронировать</button>`
-                        }
-                    </div>
+                    <button class="reserve-btn" onclick="toggleReserve(${item.id})">
+                        ${item.isReserved ? 'Снять бронь' : 'Забронировать'}
+                    </button>
                 `;
+
                 listContainer.appendChild(card);
             });
         }
 
-        // Первичный вывод карточек при загрузке страницы
+        // Первичная отрисовка при загрузке страницы
         renderItems();
     </script>
 </body>
