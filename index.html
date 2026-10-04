@@ -6,7 +6,7 @@
     <title>Список подарков с бронированием</title>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #afffab; }
-        h1, h2 { text-align: center; color: #333; background: rgb(217, 255, 224); }
+        h1, h2 { text-align: center; color: #333; border-radius: 4px; background: rgb(209, 255, 230); padding: 10px; }
         .form-card, .item-card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .form-card input { width: 100%; padding: 8px; margin: 5px 0 10px 0; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
         button { background: #ff9447; color: white; border: none; padding: 10px 15px; cursor: pointer; border-radius: 4px; font-weight: bold; }
@@ -18,8 +18,9 @@
         .item-card a:hover { text-decoration: underline; }
         .reserved { background: #bcffd9; opacity: 0.8; }
         .reserved-badge { background: #2ed573; color: white; padding: 5px 10px; border-radius: 4px; display: inline-block; font-size: 14px; margin-top: 5px; margin-bottom: 5px; }
-        .reserve-btn { background: #ffd747; width: 100%; margin-top: 10px; }
+        .reserve-btn { background: #ffd747; color: #333; width: 100%; margin-top: 10px; }
         .reserve-btn:hover { background: #dbc281; }
+        #loading { text-align: center; color: #333; grid-column: 1/-1; background: white; padding: 20px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -36,17 +37,42 @@
     </div>
 
     <h2>Список товаров</h2>
-    <div id="itemsList" class="items-grid"></div>
+    <div id="itemsList" class="items-grid">
+        <div id="loading">Загрузка данных из облака...</div>
+    </div>
 
-    <script>
-        let items = JSON.parse(localStorage.getItem('wishlist_items')) || [];
+    <!-- Подключаем Firebase для синхронизации между устройствами -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        function saveAndRender() {
-            localStorage.setItem('wishlist_items', JSON.stringify(items));
+        // НАСТРОЙКИ FIREBASE (Замени на свои данные из консоли Firebase)
+        const firebaseConfig = {
+            apiKey: "AIzaSyA_TCRGtqerqDUy0Hv6FFpWFk2Z5hRuTRI",
+            authDomain: "present-e63fc.firebaseapp.com",
+            projectId: "присутствует-e63fc",
+            storageBucket: "present-e63fc.firebasestorage.app",
+            messagingSenderId: "6515713635",
+            appId: "1:6515713635:web:ff4ffa73c066779d693a56"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const itemsCollection = collection(db, "wishlist");
+
+        let items = [];
+
+        // Получение данных в реальном времени
+        onSnapshot(itemsCollection, (snapshot) => {
+            items = [];
+            snapshot.forEach((docSnap) => {
+                items.push({ id: docSnap.id, ...docSnap.data() });
+            });
             renderItems();
-        }
+        });
 
-        function addItem() {
+        // Добавление товара в облако
+        window.addItem = async function() {
             const title = document.getElementById('title').value;
             const url = document.getElementById('url').value;
             const image = document.getElementById('image').value;
@@ -56,36 +82,42 @@
                 return;
             }
 
-            const newItem = {
-                id: Date.now(),
-                title,
-                url,
-                image,
-                isReserved: false
-            };
+            try {
+                await addDoc(itemsCollection, {
+                    title,
+                    url,
+                    image,
+                    isReserved: false
+                });
 
-            items.push(newItem);
-            document.getElementById('title').value = '';
-            document.getElementById('url').value = '';
-            document.getElementById('image').value = '';
-
-            saveAndRender();
-        }
-
-        function toggleReserve(id) {
-            const item = items.find(i => i.id === id);
-            if (item) {
-                item.isReserved = !item.isReserved;
-                saveAndRender();
+                document.getElementById('title').value = '';
+                document.getElementById('url').value = '';
+                document.getElementById('image').value = '';
+            } catch (e) {
+                console.error("Ошибка при добавлении: ", e);
+                alert("Не удалось добавить товар");
             }
         }
 
+        // Изменение статуса брони в облаке
+        window.toggleReserve = async function(id, currentStatus) {
+            try {
+                const itemDocRef = doc(db, "wishlist", id);
+                await updateDoc(itemDocRef, {
+                    isReserved: !currentStatus
+                });
+            } catch (e) {
+                console.error("Ошибка при обновлении: ", e);
+            }
+        }
+
+        // Отрисовка карточек
         function renderItems() {
             const listContainer = document.getElementById('itemsList');
             listContainer.innerHTML = '';
 
             if (items.length === 0) {
-                listContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #777;">Список пока пуст</p>';
+                listContainer.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #333; background: white; padding: 20px; border-radius: 8px;">Список пока пуст</p>';
                 return;
             }
 
@@ -100,16 +132,13 @@
                     <div>
                         ${item.isReserved ? '<span class="reserved-badge">Забронировано 🔒</span>' : ''}
                     </div>
-                    <button class="reserve-btn" onclick="toggleReserve(${item.id})">
+                    <button class="reserve-btn" onclick="toggleReserve('${item.id}', ${item.isReserved})">
                         ${item.isReserved ? 'Снять бронь' : 'Забронировать'}
                     </button>
                 `;
                 listContainer.appendChild(card);
             });
         }
-
-        // Первичный запуск отрисовки при загрузке страницы
-        renderItems();
     </script>
 </body>
 </html>
